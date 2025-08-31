@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agendamentos do Salão</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* animação suave para hover e transições */
+    .slot {
+      transition: all 0.3s ease;
+    }
+    .slot:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800">
+
+  <div class="container mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-6 text-gray-900">Agendamentos do Salão</h1>
+
+    <!-- filtros por data -->
+    <div class="mb-6 flex gap-4 items-center">
+      <label for="filterDate" class="font-medium">Filtrar por data:</label>
+      <input type="date" id="filterDate" class="border rounded px-3 py-1 shadow-sm focus:ring focus:ring-gray-300">
+      <button id="filterBtn" class="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700 transition">Filtrar</button>
+    </div>
+
+    <!-- container de slots -->
+    <div id="slotsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <!-- slots serão inseridos dinamicamente aqui -->
+    </div>
+  </div>
+
+  <script>
+    // Exemplo de dados que viriam da API
+    const agendamentos = [
+      { id: 1, cliente_nome: 'Madson', servico: 'Corte', data: '2025-09-05', hora_inicio: '14:00', status: 'confirmado' },
+      { id: 2, cliente_nome: null, servico: null, data: '2025-09-05', hora_inicio: '14:30', status: 'livre' },
+      { id: 3, cliente_nome: null, servico: null, data: '2025-09-05', hora_inicio: '15:00', status: 'livre' },
+      { id: 4, cliente_nome: 'Ana', servico: 'Coloração', data: '2025-09-05', hora_inicio: '15:30', status: 'confirmado' },
+    ];
+
+    const slotsContainer = document.getElementById('slotsContainer');
+    const filterDate = document.getElementById('filterDate');
+    const filterBtn = document.getElementById('filterBtn');
+
+    function renderSlots(date = null) {
+      slotsContainer.innerHTML = '';
+      const filtered = date ? agendamentos.filter(a => a.data === date) : agendamentos;
+
+      filtered.forEach(slot => {
+        const div = document.createElement('div');
+        div.className = `slot p-4 rounded-lg shadow-sm border 
+          ${slot.status === 'confirmado' ? 'bg-red-100 border-red-300' : 'bg-green-100 border-green-300'} 
+          flex flex-col justify-between`;
+        
+        div.innerHTML = `
+          <span class="font-semibold text-lg">${slot.hora_inicio}</span>
+          <span>${slot.status === 'confirmado' ? slot.cliente_nome + ' - ' + slot.servico : 'Disponível'}</span>
+        `;
+        slotsContainer.appendChild(div);
+      });
+    }
+
+    // renderiza slots iniciais
+    renderSlots();
+
+    // filtro por data
+    filterBtn.addEventListener('click', () => {
+      renderSlots(filterDate.value);
+    });
+  </script>
+</body>
+</html>
