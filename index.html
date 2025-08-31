@@ -18,34 +18,36 @@
 </style>
 </head>
 <body class="bg-gray-50 font-sans text-gray-800">
+
 <div class="container mx-auto p-6">
   <h1 class="text-3xl font-bold mb-6 text-gray-900">Agendamentos do Salão</h1>
 
-  <!-- filtro de data -->
+  <!-- Filtro por data -->
   <div class="mb-6 flex gap-4 items-center">
     <label for="filterDate" class="font-medium">Filtrar por data:</label>
     <input type="date" id="filterDate" class="border rounded px-3 py-1 shadow-sm focus:ring focus:ring-gray-300">
     <button id="filterBtn" class="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700 transition">Filtrar</button>
   </div>
 
+  <!-- Container de slots -->
   <div id="slotsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
 </div>
 
 <script>
-  // Inicializa Supabase
-  const SUPABASE_URL = 'https://dfzifdgmnusercbclhna.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmemlmZGdtbnVzZXJjYmNsaG5hIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDIwMjk4MywiZXhwIjoyMDY1Nzc4OTgzfQ.BpYDxZsur8L00MvKO_I5ojixsFNB0YKdwutSChwd5XU';
-  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  // --- Inicializa Supabase primeiro ---
+  const SUPABASE_URL = 'https://<seu-projeto>.supabase.co';
+  const SUPABASE_KEY = '<sua-API-key>';
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   const slotsContainer = document.getElementById('slotsContainer');
   const filterDate = document.getElementById('filterDate');
   const filterBtn = document.getElementById('filterBtn');
 
-  // Função para carregar horários do backend
+  // Função para carregar horários
   async function loadSlots(date = null) {
     slotsContainer.innerHTML = '<p class="col-span-full text-center">Carregando...</p>';
 
-    let query = supabase
+    let query = supabaseClient
       .from('horarios_disponiveis')
       .select('*');
 
@@ -89,21 +91,22 @@
     const status = 'confirmado';
 
     // Atualiza o slot no banco
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('horarios_disponiveis')
       .update({ ocupado: true })
       .eq('id', slotId)
       .select();
 
-    if (error) {
+    if (error || data.length === 0) {
       alert('Erro ao reservar horário');
       console.error(error);
       return;
     }
 
-    // Cria o agendamento
     const slot = data[0];
-    const { error: insertError } = await supabase
+
+    // Cria o agendamento
+    const { error: insertError } = await supabaseClient
       .from('agendamentos')
       .insert({
         cliente_id: clienteId,
@@ -121,7 +124,7 @@
     }
 
     alert('Horário reservado com sucesso!');
-    loadSlots(filterDate.value); // atualiza tela
+    loadSlots(filterDate.value); // atualiza slots na tela
   }
 
   // Filtro por data
@@ -130,5 +133,6 @@
   // Carrega todos os slots iniciais
   loadSlots();
 </script>
+
 </body>
 </html>
